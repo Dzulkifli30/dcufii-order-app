@@ -1,5 +1,19 @@
-/.env
-/.kiro
-/.next
-/node_modules
-/tsconfig.tsbuildinfo
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# Dependencies and build output
+node_modules/
+.next/
+out/
+tsconfig.tsbuildinfo
+
+# Local project and deployment metadata
+.kiro/
+.firebase/
+.vercel/
+
+# Logs and OS files
+*.log
+.DS_Store
