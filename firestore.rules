@@ -1,0 +1,41 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /menus/{menuId} {
+      allow read: if true;
+      allow create, delete: if isOperator();
+      allow update: if isOperator() || validOrderStockDecrement();
+    }
+
+    match /orders/{orderId} {
+      allow create: if validNewOrder();
+      allow read: if isOperator() || resource.data.status in ['menunggu pembayaran', 'pending'];
+      allow update: if isOperator();
+      allow delete: if false;
+    }
+
+    function isOperator() {
+      return request.auth != null;
+    }
+
+    function validNewOrder() {
+      return request.resource.data.customerName is string
+        && request.resource.data.tableNumber is int
+        && request.resource.data.tableNumber >= 1
+        && request.resource.data.tableNumber <= 999
+        && request.resource.data.paymentMethod in ['QRIS', 'TRANSFER_BANK', 'CASH']
+        && request.resource.data.status in ['pending', 'menunggu pembayaran']
+        && request.resource.data.items is list
+        && request.resource.data.totalPrice is number;
+    }
+
+    function validOrderStockDecrement() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['stock', 'updatedAt'])
+        && request.resource.data.stock is int
+        && request.resource.data.stock >= 0
+        && request.resource.data.stock < resource.data.stock
+        && resource.data.stock - request.resource.data.stock <= 99;
+    }
+  }
+}

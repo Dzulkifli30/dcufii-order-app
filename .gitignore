@@ -1,0 +1,6 @@
+/.env
+/.firebaserc
+/.kiro
+/.next
+/node_modules
+/tsconfig.tsbuildinfo
